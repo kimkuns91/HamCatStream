@@ -1,29 +1,16 @@
 "use client";
 
-import "video.js/dist/video-js.css";
 import "@videojs/themes/dist/fantasy/index.css";
+import "video.js/dist/video-js.css";
 
-import {
-  FaBackward,
-  FaClosedCaptioning,
-  FaCompress,
-  FaExpand,
-  FaForward,
-  FaList,
-  FaPause,
-  FaPlay,
-  FaStepForward,
-  FaTachometerAlt,
-  FaVolumeMute,
-  FaVolumeUp,
-} from "react-icons/fa";
-import React, { useEffect, useRef, useState } from "react";
 import { mutedState, volumeState } from "@/lib/state/modalAtom";
+import React, { useEffect, useRef, useState } from "react";
 
-import { IoIosArrowRoundBack } from "react-icons/io";
-import type VideoJsPlayer from "video.js/dist/types/player";
 import { useRecoilState } from "recoil";
 import videojs from "video.js";
+import type VideoJsPlayer from "video.js/dist/types/player";
+import BottomControlBar from "./BottomControlBar";
+import TopControlBar from "./TopControlBar";
 
 interface VideoPlayerProps {
   options: {
@@ -40,6 +27,12 @@ interface VideoPlayerProps {
   title?: string;
 }
 
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+};
+
 const VideoPlayer: React.FC<VideoPlayerProps> = ({
   options,
   onReady,
@@ -54,6 +47,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useRecoilState(mutedState);
   const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [aspectRatio, setAspectRatio] = useState("16 / 9"); // 초기 비율 설정
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -96,8 +92,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         const currentTime = player.currentTime();
         const duration = player.duration();
         if (currentTime !== undefined && duration && duration > 0) {
+          setCurrentTime(currentTime);
+          setDuration(duration);
           setProgress((currentTime / duration) * 100);
         }
+      });
+      player.on("loadedmetadata", () => {
+        const videoWidth = player.videoWidth();
+        const videoHeight = player.videoHeight();
+        setAspectRatio(`${videoWidth} / ${videoHeight}`);
       });
     } else {
       const player = playerRef.current;
@@ -197,120 +200,70 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   };
 
+  const handleProgressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (playerRef.current) {
+      const newProgress = Number(event.target.value);
+      const newTime = (newProgress / 100) * duration;
+      playerRef.current.currentTime(newTime);
+      setProgress(newProgress);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowRight") {
+        handleSkip(10);
+      } else if (event.key === "ArrowLeft") {
+        handleSkip(-10);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
     <div
       ref={containerRef}
       className="relative w-full h-screen min-h-screen max-h-screen bg-black text-2xl"
     >
-      {/* 상단 컨트롤 바 */}
-      <div
-        className={`control-bar top-control-bar ${
-          showControls ? "visible-control-bar" : "hidden-control-bar"
-        }`}
-      >
-        {/* 상단 뒤로가기 버튼 */}
-        <button
-          className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200"
-          onClick={() => window.history.back()}
-        >
-          <IoIosArrowRoundBack className="text-7xl font-bold" />
-        </button>
-      </div>
-      {/* 영상 영역 */}
+      <TopControlBar
+        showControls={showControls}
+        onBack={() => window.history.back()}
+      />
       <div
         data-vjs-player
-        className="w-full max-h-screen flex items-center justify-center cursor-pointer relative"
+        className="w-full h-full flex items-center justify-center cursor-pointer relative"
         onClick={handlePlayPause}
+        style={{ maxHeight: "100vh", overflow: "hidden" }}
       >
         <div
           ref={videoRef}
-          className="w-full max-h-screen max-w-[1920px] mx-auto"
+          className="w-full max-h-full max-w-[1920px] mx-auto"
+          style={{ aspectRatio }}
         />
       </div>
-
-      {/* 하단 컨트롤 바 */}
-      <div
-        className={`control-bar bottom-control-bar ${
-          showControls ? "visible-control-bar" : "hidden-control-bar"
-        }`}
-      >
-        {/* 진행률 표시 바 */}
-        <div className="w-full h-2 bg-gray-700 mb-8">
-          <div
-            className="h-full bg-blue-500"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-8">
-            {isPlaying ? (
-              <button
-                className="text-white"
-                onClick={() => playerRef.current?.pause()}
-              >
-                <FaPause />
-              </button>
-            ) : (
-              <button
-                className="text-white"
-                onClick={() => playerRef.current?.play()}
-              >
-                <FaPlay />
-              </button>
-            )}
-            <button
-              className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200"
-              onClick={() => handleSkip(-10)}
-            >
-              <FaBackward />
-            </button>
-            <button
-              className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200"
-              onClick={() => handleSkip(10)}
-            >
-              <FaForward />
-            </button>
-            <div className="relative flex items-center gap-6">
-              <button
-                className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200"
-                onClick={handleMuteToggle}
-              >
-                {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
-              </button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={isMuted ? 0 : volume}
-                onChange={handleVolumeChange}
-                className="w-24"
-              />
-            </div>
-          </div>
-          <div className="text-white font-bold">{title}</div>
-          <div className="flex items-center gap-6">
-            <button className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200">
-              <FaStepForward />
-            </button>
-            <button className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200">
-              <FaList />
-            </button>
-            <button className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200">
-              <FaClosedCaptioning />
-            </button>
-            <button className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200">
-              <FaTachometerAlt />
-            </button>
-            <button
-              className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200"
-              onClick={handleFullscreenToggle}
-            >
-              {isFullscreen ? <FaCompress /> : <FaExpand />}
-            </button>
-          </div>
-        </div>
-      </div>
+      <BottomControlBar
+        showControls={showControls}
+        isPlaying={isPlaying}
+        isMuted={isMuted}
+        isFullscreen={isFullscreen}
+        volume={volume}
+        progress={progress}
+        currentTime={currentTime}
+        duration={duration}
+        title={title || ""}
+        onPlayPause={handlePlayPause}
+        onSkip={handleSkip}
+        onVolumeChange={handleVolumeChange}
+        onMuteToggle={handleMuteToggle}
+        onFullscreenToggle={handleFullscreenToggle}
+        onProgressChange={handleProgressChange}
+        formatTime={formatTime}
+      />
     </div>
   );
 };

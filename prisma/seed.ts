@@ -6,44 +6,15 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.content.create({
     data: {
-      title: "슈가슈가룬",
-      description: "슈가슈가룬 설명입니다.",
-      url: "",
+      title: "댓글 부대",
+      description: "창경일보 사회부 기자인 임상진은 대기업 만전의 비리를 취재한 기사가 오보로 몰려 정직당하고 만다. 복직을 노리던 상진은 댓글부대 팀 알렙에 대한 제보를 받게 된다.",
+      url: "https://storage.googleapis.com/white_mouse_dev/videos/trollfactory/Troll_Factory.mp4",
       uploadDate: new Date(),
       duration: 0,
       resolution: "1080p",
-      tags: ["애니메이션", "판타지", "슈가슈가룬"],
-      type: "SERIES",
-      posterUrl: "https://storage.googleapis.com/white_mouse_dev/posters/sugarsugarrune/main.png", // 콘텐츠 포스터 이미지 URL
-      episodes: {
-        create: [
-          {
-            title: "슈가슈가룬 1화",
-            description: "슈가슈가룬 1화의 설명입니다.",
-            url: "https://storage.googleapis.com/white_mouse_dev/sugarsugarrune/01.mp4",
-            uploadDate: new Date(),
-            duration: 0,
-            resolution: "1080p",
-            tags: ["애니메이션", "판타지", "슈가슈가룬"],
-            season: 1,
-            episode: 1,
-            posterUrl: "https://storage.googleapis.com/white_mouse_dev/posters/sugarsugarrune/01.png" // 에피소드 포스터 이미지 URL
-          },
-          {
-            title: "슈가슈가룬 2화",
-            description: "슈가슈가룬 2화의 설명입니다.",
-            url: "https://storage.googleapis.com/white_mouse_dev/sugarsugarrune/02.mp4",
-            uploadDate: new Date(),
-            duration: 0,
-            resolution: "1080p",
-            tags: ["애니메이션", "판타지", "슈가슈가룬"],
-            season: 1,
-            episode: 2,
-            posterUrl: "https://storage.googleapis.com/white_mouse_dev/posters/sugarsugarrune/02.png" // 에피소드 포스터 이미지 URL
-          },
-          // 다른 에피소드들도 여기에 추가
-        ],
-      },
+      tags: [" 범죄", "드라마"],
+      type: "MOVIE",
+      posterUrl: "https://storage.googleapis.com/white_mouse_dev/posters/trollfactory/01.webp", 
     },
   });
 

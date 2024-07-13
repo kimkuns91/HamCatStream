@@ -1,0 +1,43 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Content {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  url         String
+  uploadDate  DateTime @default(now())
+  duration    Int?
+  resolution  String?
+  tags        String[]
+  type        ContentType
+  episodes    Episode[]
+  posterUrl   String? // 포스터 이미지 URL
+}
+
+model Episode {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  url         String
+  uploadDate  DateTime @default(now())
+  duration    Int?
+  resolution  String?
+  tags        String[]
+  season      Int
+  episode     Int
+  contentId   String   @db.ObjectId
+  content     Content  @relation(fields: [contentId], references: [id])
+  posterUrl   String? // 에피소드 포스터 이미지 URL
+}
+
+enum ContentType {
+  MOVIE
+  SERIES
+}

@@ -2,32 +2,140 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
+@import "video.js/dist/video-js.css";
+@import "@videojs/themes/dist/fantasy/index.css";
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+@layer base {
+  body {
+    @apply font-primary bg-primary text-white leading-loose;
   }
-}
+  .custom-scrollbar {
+    overflow-y: auto;
+  }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
+  /* 스크롤바의 폭 너비 */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(0deg, #b46ef3, #877ee9);
+    /* background-color: #3e248b;  */
+    /* 스크롤바 색상 */
+    border-radius: 10px; /* 스크롤바 둥근 테두리 */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #020617; /*스크롤바 뒷 배경 색상*/
+  }
+  /* global.css */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  .header {
+    position: relative;
+  }
+
+  .header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 130%;
+    background: linear-gradient(
       to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
+      rgba(0, 0, 0, 0.8) 70%,
+      rgba(0, 0, 0, 0)
+    );
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .header-background::before {
+    opacity: 1;
+  }
+
+  .header-background-out::before {
+    opacity: 0;
+  }
+
+  .banner-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: -10;
+    height: 80vh;
+    width: 100%;
+    background: linear-gradient(
+      to top,
+      rgba(20, 20, 20, 1) 50%,
+      rgba(20, 20, 20, 0)
+    );
+  }
+
+  .control-bar {
+    position: absolute;
+    width: 100%;
+    color: white;
+    transition: opacity 0.3s;
+    font-size: 1.5em;
+    z-index: 10;
+  }
+
+  .top-control-bar {
+    top: 0;
+    padding: 30px 50px 70px 50px;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 1) 70%,
+      rgba(0, 0, 0, 0)
+    );
+  }
+
+  .bottom-control-bar {
+    bottom: 0;
+    padding: 70px 50px 30px 50px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0));
+  }
+
+  .hidden-control-bar {
+    opacity: 0;
+  }
+
+  .visible-control-bar {
+    opacity: 1;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
+  /* global.css */
+  .fullscreen-control-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
   }
 }

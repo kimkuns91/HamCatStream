@@ -1,8 +1,5 @@
-import { getContent, getVideo } from "@/lib/fetch";
-
-import Content from "@/components/Content";
-import VideoContainer from "@/components/VideoContainer";
-import { redirect } from "next/navigation";
+import VideoContainer from '@/components/VideoContainer';
+import { getVideo } from '@/lib/fetch';
 
 interface PageProps {
   params: {
@@ -11,9 +8,14 @@ interface PageProps {
 }
 
 export default async function Page({ params }: PageProps) {
-  const video = await getVideo(params.videoId);
+  const videoData = await getVideo(params.videoId);
 
-  if (!video) return null;
+  if (!videoData) return null;
 
-  return <VideoContainer video={video} />;
+  return (
+    <VideoContainer
+      video={videoData.video}
+      nextVideo={videoData.nextEpisode?.id}
+    />
+  );
 }

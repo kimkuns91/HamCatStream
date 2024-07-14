@@ -1,10 +1,10 @@
 import Banner from "@/components/Banner";
-import Contents from "@/components/Contents";
 import Row from "@/components/Row";
 import { getContents } from "@/lib/fetch";
 
 export default async function Page() {
   const contents = await getContents();
+  
   return (
     <div className="size-full min-h-screen">
       <Banner contents={contents} />

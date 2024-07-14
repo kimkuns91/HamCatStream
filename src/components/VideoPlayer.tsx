@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import "@videojs/themes/dist/fantasy/index.css";
-import "video.js/dist/video-js.css";
+import '@videojs/themes/dist/fantasy/index.css';
+import 'video.js/dist/video-js.css';
 
-import { mutedState, volumeState } from "@/lib/state/modalAtom";
-import React, { useEffect, useRef, useState } from "react";
+import { mutedState, volumeState } from '@/lib/state/modalAtom';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { useRecoilState } from "recoil";
-import videojs from "video.js";
-import type VideoJsPlayer from "video.js/dist/types/player";
-import BottomControlBar from "./BottomControlBar";
-import TopControlBar from "./TopControlBar";
+import { useRecoilState } from 'recoil';
+import videojs from 'video.js';
+import type VideoJsPlayer from 'video.js/dist/types/player';
+import BottomControlBar from './BottomControlBar';
+import TopControlBar from './TopControlBar';
 
 interface VideoPlayerProps {
   options: {
@@ -18,6 +18,7 @@ interface VideoPlayerProps {
     controls?: boolean;
     responsive?: boolean;
     fluid?: boolean;
+    fill?: boolean;
     sources?: {
       src: string;
       type: string;
@@ -25,18 +26,14 @@ interface VideoPlayerProps {
   };
   onReady?: (player: VideoJsPlayer) => void;
   title?: string;
+  nextVideo?: string | null;
 }
-
-const formatTime = (seconds: number) => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
-};
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({
   options,
   onReady,
   title,
+  nextVideo
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLDivElement | null>(null);
@@ -49,14 +46,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [aspectRatio, setAspectRatio] = useState("16 / 9"); // 초기 비율 설정
+  const [aspectRatio, setAspectRatio] = useState('16 / 9');
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!playerRef.current) {
-      const videoElement = document.createElement("video-js");
-      videoElement.classList.add("vjs-big-play-centered");
-      videoElement.classList.add("custom-video-js"); // Custom class for styling
+      const videoElement = document.createElement('video-js');
+      videoElement.classList.add('vjs-big-play-centered');
+      videoElement.classList.add('custom-video-js'); // Custom class for styling
       if (videoRef.current) {
         videoRef.current.appendChild(videoElement);
       }
@@ -68,7 +65,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
           controls: false, // Disable default controls
         },
         () => {
-          videojs.log("player is ready");
+          videojs.log('player is ready');
           if (onReady) {
             onReady(player);
           }
@@ -76,9 +73,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       ));
 
       // 이벤트 리스너를 추가하여 재생 상태를 업데이트합니다.
-      player.on("play", () => setIsPlaying(true));
-      player.on("pause", () => setIsPlaying(false));
-      player.on("volumechange", () => {
+      player.on('play', () => setIsPlaying(true));
+      player.on('pause', () => setIsPlaying(false));
+      player.on('volumechange', () => {
         const muted = player.muted();
         const volume = player.volume();
         if (muted !== undefined) {
@@ -88,7 +85,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
           setVolume(volume || 0);
         }
       });
-      player.on("timeupdate", () => {
+      player.on('timeupdate', () => {
         const currentTime = player.currentTime();
         const duration = player.duration();
         if (currentTime !== undefined && duration && duration > 0) {
@@ -97,7 +94,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
           setProgress((currentTime / duration) * 100);
         }
       });
-      player.on("loadedmetadata", () => {
+      player.on('loadedmetadata', () => {
         const videoWidth = player.videoWidth();
         const videoHeight = player.videoHeight();
         setAspectRatio(`${videoWidth} / ${videoHeight}`);
@@ -132,10 +129,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       resetTimer();
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener('mousemove', handleMouseMove);
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
@@ -211,24 +208,39 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowRight") {
+      if (event.key === 'ArrowRight') {
         handleSkip(10);
-      } else if (event.key === "ArrowLeft") {
+      } else if (event.key === 'ArrowLeft') {
         handleSkip(-10);
+      } else if (event.key === ' ') {
+        event.preventDefault(); // 스크롤 방지
+        handlePlayPause();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-screen min-h-screen max-h-screen bg-black text-2xl"
+      className="relative w-full h-screen min-h-screen max-h-screen bg-black text-2xl focus:outline-none"
     >
       <TopControlBar
         showControls={showControls}
@@ -236,14 +248,18 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       />
       <div
         data-vjs-player
-        className="w-full h-full flex items-center justify-center cursor-pointer relative"
+        className="w-full h-full flex items-center justify-center cursor-pointer relative focus:outline-none"
         onClick={handlePlayPause}
-        style={{ maxHeight: "100vh", overflow: "hidden" }}
+        style={{ maxHeight: '100vh', overflow: 'hidden' }}
       >
         <div
           ref={videoRef}
-          className="w-full max-h-full max-w-[1920px] mx-auto"
-          style={{ aspectRatio }}
+          className="w-full mx-auto"
+          style={{
+            aspectRatio,
+            objectFit: 'contain',
+            maxHeight: '100%',
+          }}
         />
       </div>
       <BottomControlBar
@@ -255,14 +271,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         progress={progress}
         currentTime={currentTime}
         duration={duration}
-        title={title || ""}
+        title={title || ''}
+        nextVideo={nextVideo}
         onPlayPause={handlePlayPause}
         onSkip={handleSkip}
         onVolumeChange={handleVolumeChange}
         onMuteToggle={handleMuteToggle}
         onFullscreenToggle={handleFullscreenToggle}
         onProgressChange={handleProgressChange}
-        formatTime={formatTime}
       />
     </div>
   );

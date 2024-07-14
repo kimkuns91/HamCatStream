@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { contentState, modalState } from "@/lib/state/modalAtom";
-import { useEffect, useState } from "react";
+import { contentState, modalState } from '@/lib/state/modalAtom';
+import { useEffect, useState } from 'react';
+import { FaInfoCircle, FaPlay } from 'react-icons/fa';
 
-import { Button } from "./ui/button";
-import { Content } from "@prisma/client";
-import { FaInfoCircle } from "react-icons/fa";
-import { FaPlay } from "react-icons/fa";
-import Image from "next/image";
-import { useRecoilState } from "recoil";
+import { Content } from '@prisma/client';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useRecoilState } from 'recoil';
+import { Button } from './ui/button';
 
 interface BannerProps {
   contents: Content[];
@@ -19,6 +19,8 @@ const Banner: React.FC<BannerProps> = ({ contents }) => {
   const [showModal, setShowModal] = useRecoilState(modalState);
   const [currentMovie, setCurrentMovie] = useRecoilState(contentState);
 
+  const navigate = useRouter();
+
   useEffect(() => {
     setContent(contents[Math.floor(Math.random() * contents.length)]);
   }, [contents]);
@@ -26,12 +28,15 @@ const Banner: React.FC<BannerProps> = ({ contents }) => {
   return (
     <div className="flex flex-col space-y-2 py-16 md:space-y-4 lg:h-[50vh] lg:justify-end lg:pb-12">
       <div className="absolute top-0 left-0 -z-10 h-[65vh] w-full">
-        <Image
-          src={content?.posterUrl || "/images/sugar.png"}
-          layout="fill"
-          objectFit="cover"
-          alt="{movie?.title || movie?.name || movie?.original_name}"
-        />
+        {content?.backdropUrl && (
+          <Image
+            src={content.backdropUrl}
+            layout="fill"
+            objectFit="cover"
+            alt="{movie?.title || movie?.name || movie?.original_name}"
+            priority
+          />
+        )}
       </div>
       <div className="banner-overlay" />
 
@@ -44,7 +49,15 @@ const Banner: React.FC<BannerProps> = ({ contents }) => {
         </p>
 
         <div className="flex space-x-3">
-          <Button className="bg-white text-black py-7 px-8 flex gap-4 hover:opacity-80 hover:bg-[#e6e6e6] transition-opacity ease-in-out">
+          <Button
+            onClick={() => {
+              if (content?.videoUrl) {
+                navigate.push(`/watch/${content.id}`);
+              } else {
+              }
+            }}
+            className="bg-white text-black py-7 px-8 flex gap-4 hover:opacity-80 hover:bg-[#e6e6e6] transition-opacity ease-in-out"
+          >
             <FaPlay className="h-4 w-4 md:h-7 md:w-7" />
             <p className="text-lg font-bold">재생</p>
           </Button>

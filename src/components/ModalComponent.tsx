@@ -6,7 +6,9 @@ import React, { useEffect, useState } from 'react';
 import { FaPlay, FaPlus, FaThumbsUp } from 'react-icons/fa';
 
 import { getContent } from '@/lib/fetch';
+import { formatTime } from '@/lib/formatTime';
 import { Episode } from '@prisma/client';
+import { format } from 'date-fns';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { IoIosClose } from 'react-icons/io';
@@ -109,13 +111,48 @@ const ModalComponent: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col mt-4 px-8 py-8 gap-8">
+              <div className="w-full flex flex-col mt-4 px-8 py-8 gap-8">
                 <h3 className="text-xl font-bold text-gray-100 md:text-2xl lg:text-5xl">
                   {content?.title || 'Title'}
                 </h3>
-                <p className="max-w-xs text-xs text-shadow-md md:max-w-lg md:text-lg lg:max-w-2xl lg:text-2xl">
-                  {content?.description}
-                </p>
+                <div className="flex items-start justify-between gap-6">
+                  <p
+                    className="flex-[2.5] text-xs text-shadow-md md:text-lg lg:text-2xl"
+                    style={{ lineHeight: '1.75' }}
+                  >
+                    {content?.description}
+                  </p>
+                  <div className="flex-[1] flex flex-col gap-4 text-xs text-shadow-md md:text-base lg:text-base">
+                    {content?.tags && (
+                      <div className="flex items-center gap-4">
+                        {content.tags.map((tag, index) => (
+                          <div key={index} className="flex items-center gap-4">
+                            <p className="px-3 py-2 bg-slate-700 rounded-lg">
+                              {tag}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {content?.releaseDate && (
+                      <div className="flex items-center gap-4">
+                        <p>개봉일 : </p>
+                        <p>
+                          {format(
+                            new Date(content?.releaseDate),
+                            'yyyy년 MM월 dd일'
+                          )}
+                        </p>
+                      </div>
+                    )}
+                    {content?.duration && (
+                      <div className="flex items-center gap-4">
+                        <p>상영 시간 : </p>
+                        <p>{formatTime(content?.duration)}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
               {content && content.type === 'SERIES' && (
                 <div className="w-full mt-12 px-8 pb-20">
@@ -160,8 +197,7 @@ const ModalComponent: React.FC = () => {
                                   {episode.title}
                                 </p>
                                 <p className="text-sm text-gray-400">
-                                  {episode.description ||
-                                    'No description available.'}
+                                  {episode.description || content.description}
                                 </p>
                               </div>
                             </div>

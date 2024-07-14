@@ -16,6 +16,7 @@
         "@videojs/themes": "^1.0.1",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
+        "date-fns": "^3.6.0",
         "framer-motion": "^11.3.2",
         "hls.js": "^1.5.13",
         "lucide-react": "^0.408.0",

@@ -7,17 +7,19 @@ import VideoPlayer from "./VideoPlayer";
 
 interface VideoContainerProps {
   video: Content | Episode;
+  nextVideo?: string | null;
 }
 
-const VideoContainer: React.FC<VideoContainerProps> = ({ video }) => {
+const VideoContainer: React.FC<VideoContainerProps> = ({ video, nextVideo }) => {
   const videoJsOptions = {
     autoplay: true,
     controls: false,
     responsive: true,
-    fluid: true,
+    // fluid: true,
+    fill: true,
     sources: [
       {
-        src: video.url,
+        src: video.videoUrl!,
         type: "video/mp4",
       },
     ],
@@ -30,6 +32,7 @@ const VideoContainer: React.FC<VideoContainerProps> = ({ video }) => {
   return (
     <VideoPlayer
       title={video.title}
+      nextVideo={nextVideo}
       options={videoJsOptions}
       onReady={handlePlayerReady}
     />

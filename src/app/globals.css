@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "video.js/dist/video-js.css";
-@import "@videojs/themes/dist/fantasy/index.css";
+@import 'video.js/dist/video-js.css';
+@import '@videojs/themes/dist/fantasy/index.css';
 
 @layer base {
   body {
@@ -52,7 +52,7 @@
   }
 
   .header::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -102,17 +102,17 @@
   .top-control-bar {
     top: 0;
     padding: 30px 50px 70px 50px;
-    background: linear-gradient(
+    /* background: linear-gradient(
       to bottom,
       rgba(0, 0, 0, 1) 70%,
       rgba(0, 0, 0, 0)
-    );
+    ); */
   }
 
   .bottom-control-bar {
     bottom: 0;
     padding: 70px 50px 30px 50px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0));
+    /* background: linear-gradient(to top, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0)); */
   }
 
   .hidden-control-bar {
@@ -138,4 +138,8 @@
     left: 0;
     right: 0;
   }
+  video:focus {
+    outline: none !important;
+  }
+
 }

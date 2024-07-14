@@ -1,8 +1,7 @@
-"use server";
+'use server';
 
-import { Prisma } from "@prisma/client";
-import { cache } from "react";
-import prisma from "@/lib/prisma";
+import prisma from '@/lib/prisma';
+import { cache } from 'react';
 
 const isValidObjectId = (id: string): boolean => /^[0-9a-fA-F]{24}$/.test(id);
 
@@ -30,12 +29,12 @@ export const getContent = cache(async (contentId: string) => {
 });
 
 export const getVideo = async (videoId: string) => {
-  let video = await prisma.content.findUnique({
+  const video = await prisma.content.findUnique({
     where: { id: videoId },
   });
 
   if (video) {
-    return video;
+    return { video, nextEpisode: null };
   }
 
   // Content에서 찾지 못하면 Episode에서 검색
@@ -44,12 +43,25 @@ export const getVideo = async (videoId: string) => {
   });
 
   if (episode) {
-    return episode;
+    // 다음 에피소드를 찾기 위해 같은 콘텐츠의 다음 에피소드를 검색
+    const nextEpisode = await prisma.episode.findFirst({
+      where: {
+        contentId: episode.contentId,
+        season: episode.season,
+        episode: {
+          gt: episode.episode,
+        },
+      },
+      orderBy: {
+        episode: 'asc',
+      },
+    });
+
+    return { video: episode, nextEpisode };
   }
 
   return null;
 };
-
 
 // // 모든 Tags 가져오기
 // export const getTags = cache(async () => {

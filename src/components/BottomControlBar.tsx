@@ -15,6 +15,8 @@ import {
   FaVolumeUp,
 } from 'react-icons/fa';
 
+import { formatTime } from '@/lib/formatTime';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
 interface BottomControlBarProps {
@@ -27,13 +29,13 @@ interface BottomControlBarProps {
   currentTime: number;
   duration: number;
   title: string;
+  nextVideo?: string | null;
   onPlayPause: () => void;
   onSkip: (seconds: number) => void;
   onVolumeChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onMuteToggle: () => void;
   onFullscreenToggle: () => void;
   onProgressChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  formatTime: (seconds: number) => string;
 }
 
 const BottomControlBar: React.FC<BottomControlBarProps> = ({
@@ -46,14 +48,15 @@ const BottomControlBar: React.FC<BottomControlBarProps> = ({
   currentTime,
   duration,
   title,
+  nextVideo,
   onPlayPause,
   onSkip,
   onVolumeChange,
   onMuteToggle,
   onFullscreenToggle,
   onProgressChange,
-  formatTime,
 }) => {
+  const navigate = useRouter();
   return (
     <div
       className={`control-bar bottom-control-bar ${
@@ -67,7 +70,7 @@ const BottomControlBar: React.FC<BottomControlBarProps> = ({
           max="100"
           value={progress}
           onChange={onProgressChange}
-          className="flex-1 h-2 bg-gray-700 cursor-pointer rounded-md"
+          className="flex-1 h-2 bg-gray-700 cursor-pointer rounded-md focus:outline-none"
           style={{
             background: `linear-gradient(to right, #3b82f6 ${progress}%, #374151 ${progress}%)`,
           }}
@@ -114,7 +117,7 @@ const BottomControlBar: React.FC<BottomControlBarProps> = ({
               step="0.05"
               value={isMuted ? 0 : volume}
               onChange={onVolumeChange}
-              className="w-24 cursor-pointer"
+              className="w-24 cursor-pointer focus:outline-none"
             />
           </div>
         </div>
@@ -122,9 +125,17 @@ const BottomControlBar: React.FC<BottomControlBarProps> = ({
           <p>{title}</p>
         </div>
         <div className="flex-1 flex items-center justify-end gap-6">
-          <button className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200">
-            <FaStepForward />
-          </button>
+          {
+            nextVideo && (
+              <button
+              onClick={() => {
+                navigate.push(`/watch/${nextVideo}`);
+              }} 
+              className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200">
+                <FaStepForward />
+              </button>
+            )
+          }
           <button className="text-white flex items-center gap-2 hover:scale-125 transition-transform duration-200">
             <FaList />
           </button>

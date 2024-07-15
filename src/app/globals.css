@@ -81,7 +81,6 @@
     bottom: 0;
     left: 0;
     z-index: -10;
-    height: 80vh;
     width: 100%;
     background: linear-gradient(
       to top,
@@ -101,7 +100,7 @@
 
   .top-control-bar {
     top: 0;
-    padding: 30px 50px 70px 50px;
+    padding: 30px 50px;
     /* background: linear-gradient(
       to bottom,
       rgba(0, 0, 0, 1) 70%,
@@ -111,7 +110,7 @@
 
   .bottom-control-bar {
     bottom: 0;
-    padding: 70px 50px 30px 50px;
+    padding: 30px 50px;
     /* background: linear-gradient(to top, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0)); */
   }
 
@@ -138,8 +137,12 @@
     left: 0;
     right: 0;
   }
+  input:focus {
+    outline: none !important;
+  }
   video:focus {
     outline: none !important;
   }
 
+  
 }

@@ -27,24 +27,35 @@ const Banner: React.FC<BannerProps> = ({ contents }) => {
 
   return (
     <div className="flex flex-col space-y-2 py-16 md:space-y-4 lg:h-[50vh] lg:justify-end lg:pb-12">
-      <div className="absolute top-0 left-0 -z-10 h-[65vh] w-full">
+      <div className="absolute top-0 left-0 -z-10 h-[40vh] lg:h-[65vh] w-full">
         {content?.backdropUrl && (
           <Image
             src={content.backdropUrl}
-            layout="fill"
+            fill 
             objectFit="cover"
             alt="{movie?.title || movie?.name || movie?.original_name}"
             priority
           />
         )}
       </div>
-      <div className="banner-overlay" />
+      <div className="banner-overlay h-screen lg:h-[80vh]" />
 
       <div className="container flex flex-col space-y-8">
-        <h1 className="text-2xl font-bold md:text-4xl lg:text-7xl">
-          {content?.title}
-        </h1>
-        <p className="max-w-xs text-xs text-shadow-md md:max-w-lg md:text-lg lg:max-w-2xl lg:text-2xl">
+        {content?.titleImageUrl ? (
+          <Image
+            src={content?.titleImageUrl}
+            width={500}
+            height={300}
+            className='w-1/2 lg:w-5/12'
+            alt={content?.title}
+          />
+        ) : (
+          <h1 className="text-2xl font-bold md:text-4xl lg:text-7xl">
+            {content?.title}
+          </h1>
+        )}
+
+        <p className="hidden md:block max-w-xs text-sm text-shadow-md md:max-w-lg md:text-lg lg:max-w-2xl lg:text-xl">
           {content?.description}
         </p>
 

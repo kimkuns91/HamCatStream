@@ -59,7 +59,7 @@ const BottomControlBar: React.FC<BottomControlBarProps> = ({
   const navigate = useRouter();
   return (
     <div
-      className={`control-bar bottom-control-bar ${
+      className={`control-bar bottom-0 px-8 md:px-12 py-8 ${
         showControls ? 'visible-control-bar' : 'hidden-control-bar'
       }`}
     >
@@ -80,7 +80,7 @@ const BottomControlBar: React.FC<BottomControlBarProps> = ({
         </div>
       </div>
 
-      <div className="w-full flex justify-between items-center">
+      <div className="w-full flex flex-col gap-8 md:gap-0 md:flex-row justify-between items-center">
         <div className="flex-1 flex items-center justify-start gap-8">
           {isPlaying ? (
             <button className="text-white" onClick={onPlayPause}>
@@ -121,7 +121,7 @@ const BottomControlBar: React.FC<BottomControlBarProps> = ({
             />
           </div>
         </div>
-        <div className="flex-1 flex items-center justify-center text-white font-bold text-2xl">
+        <div className="flex-1 hidden md:flex items-center justify-center text-white font-bold text-2xl">
           <p>{title}</p>
         </div>
         <div className="flex-1 flex items-center justify-end gap-6">

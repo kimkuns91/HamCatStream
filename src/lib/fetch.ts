@@ -1,6 +1,7 @@
 'use server';
 
 import prisma from '@/lib/prisma';
+import { ContentWithRelations } from '@/types/types';
 import { cache } from 'react';
 
 const isValidObjectId = (id: string): boolean => /^[0-9a-fA-F]{24}$/.test(id);
@@ -15,12 +16,30 @@ export const getContents = cache(async () => {
 });
 
 // postId로 Post 자료 가져오기
-export const getContent = cache(async (contentId: string) => {
+export const getContent = cache(async (contentId: string): Promise<ContentWithRelations | null> => {
   const content = await prisma.content.findUnique({
     where: {
       id: contentId,
     },
-    include: { episodes: true },
+    include: {
+      episodes: true,
+      genres: {
+        include: {
+          genre: true,
+        },
+      },
+      countries: {
+        include: {
+          country: true,
+        },
+      },
+      actors: {
+        include: {
+          actor: true,
+        },
+      },
+      director: true,
+    },
   });
 
   if (!content) return null;

@@ -1,6 +1,5 @@
-"use client";
+'use client';
 
-import { CircleUser, Menu, Package2, Search } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,22 +7,23 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useEffect, useState } from "react";
+} from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { CircleUser, Menu, Package2, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const Header = () => {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const shouldHideHeader = pathname.startsWith("/watch");
+  const shouldHideHeader = pathname.startsWith('/watch');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,9 +34,9 @@ const Header = () => {
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -47,15 +47,15 @@ const Header = () => {
   return (
     <header
       className={cn(
-        "sticky z-20 top-0 py-6 text-white transition-colors duration-300 header",
-        isScrolled ? "header-background" : "header-background-out"
+        'sticky z-20 top-0 py-6 text-white transition-colors duration-300 header',
+        isScrolled ? 'header-background' : 'header-background-out'
       )}
     >
       <div className="w-full container flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center mr-6">
-          <div className="relative w-[125px] h-[100px] transition-all ease-in-out hover:opacity-80">
+        <Link href="/" className="hidden md:flex items-center mr-6">
+          <div className="relative w-[70px] h-[60px] lg:w-[125px] lg:h-[100px] transition-all ease-in-out hover:opacity-80">
             <Image
-              src={"/images/LogoBasic.png"}
+              src={'/images/LogoBasic.png'}
               alt="Logo"
               layout="fill"
               objectFit="contain"
@@ -95,18 +95,32 @@ const Header = () => {
             내가 찜한 리스트
           </Link>
         </nav>
+
         <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="shrink-0 md:hidden"
-            >
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle navigation menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left">
+          <div className='flex items-center space-x-4'>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 md:hidden bg-primary/20 border-none"
+              >
+                <Menu className="h-10 w-10 text-white font-bold" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <Link href="/" className="flex md:hidden items-center mr-6">
+              <div className="relative w-[60px] h-[50px] transition-all ease-in-out hover:opacity-80">
+                <Image
+                  src={'/images/LogoBasic.png'}
+                  alt="Logo"
+                  layout="fill"
+                  objectFit="contain"
+                  priority
+                />
+              </div>
+            </Link>
+          </div>
+          <SheetContent side="left" className='bg-primary border-gray-700'>
             <nav className="grid gap-6 text-lg font-medium">
               <Link
                 href="#"
@@ -157,7 +171,7 @@ const Header = () => {
             </div>
           </form>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild className="hidden md:flex">
               <Button variant="secondary" size="icon" className="rounded-full">
                 <CircleUser className="h-5 w-5" />
                 <span className="sr-only">Toggle user menu</span>

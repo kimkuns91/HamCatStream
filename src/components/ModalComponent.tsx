@@ -1,13 +1,14 @@
 'use client';
 
 import { contentState, modalState } from '@/lib/state/modalAtom';
+import { Content, Episode } from '@prisma/client';
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { FaPlay, FaPlus, FaThumbsUp } from 'react-icons/fa';
 
 import { getContent } from '@/lib/fetch';
 import { formatTime } from '@/lib/formatTime';
-import { Episode } from '@prisma/client';
+import { ContentWithRelations } from '@/types/types';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -18,7 +19,9 @@ import { Button } from './ui/button';
 
 const ModalComponent: React.FC = () => {
   const [showModal, setShowModal] = useRecoilState(modalState);
-  const [content] = useRecoilState(contentState);
+  const [content] = useRecoilState<Content | null>(contentState);
+  const [extendContent, setExtendContent] =
+    useState<ContentWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [episode, setEpisode] = useState<Episode[] | null>(null);
 
@@ -31,14 +34,12 @@ const ModalComponent: React.FC = () => {
   useEffect(() => {
     if (!content) return;
 
-    if (content.type === 'MOVIE') return;
-
     (async () => {
       try {
         setLoading(true);
         const result = await getContent(content.id);
         if (!result) return;
-        setEpisode(result.episodes);
+        setExtendContent(result);
       } catch (error) {
         console.error(error);
       } finally {
@@ -66,9 +67,9 @@ const ModalComponent: React.FC = () => {
             className="fixed inset-0 bg-black opacity-50"
             onClick={handleClose}
           />
-          <div className="overflow-y-auto scrollbar-hide w-[80%] max-w-[1240px] min-h-screen h-full py-20">
+          <div className="overflow-y-auto scrollbar-hide w-[95%] md:w-[80%] max-w-[1240px] min-h-screen h-full py-20">
             <motion.div
-              className="relative w-full bg-[#191919] rounded-lg shadow-lg z-10 pb-20"
+              className="relative w-full bg-[#191919] rounded-lg shadow-lg z-10 pb-10 md:pb-20"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
@@ -82,22 +83,40 @@ const ModalComponent: React.FC = () => {
               </button>
               <div className="relative pt-[56.25%]">
                 <Image
-                  src={content?.posterUrl || '/images/sugar.png'}
-                  layout="fill"
+                  src={
+                    content?.backdropUrl ||
+                    content?.posterUrl ||
+                    "/images/noPoster.webp"
+                  }
+                  fill
                   objectFit="cover"
                   alt={content?.title || 'Title'}
                   className="rounded-t-lg"
                 />
-                <div className="absolute bottom-10 flex w-full items-center justify-between px-10">
-                  <div className="flex space-x-8">
+                <div className="absolute flex flex-col bottom-10 w-full items-start gap-8 px-6 md:px-10">
+                  {content?.titleImageUrl ? (
+                    <Image
+                      src={content?.titleImageUrl}
+                      width={400}
+                      height={250}
+                      className='w-2/3 lg:w-5/12'
+                      alt={content?.title}
+                    />
+                  ) : (
+                    <h1 className="text-2xl font-bold text-gray-100 md:text-4xl lg:text-7xl">
+                      {content?.title}
+                    </h1>
+                  )}
+
+                  <div className="flex items-center space-x-8">
                     <Button
                       onClick={() => {
                         handleClose();
                         navigate.push(`/watch/${content?.id}`);
                       }}
-                      className="flex items-center gap-x-2 rounded bg-white  py-7 px-8 text-xl font-bold text-black transition hover:bg-[#e6e6e6]"
+                      className="flex items-center gap-x-2 rounded bg-white p-6 md:py-7 md:px-8 text-lg md:text-xl font-bold text-black transition hover:bg-[#e6e6e6]"
                     >
-                      <FaPlay className="h-7 w-7 text-black" />
+                      <FaPlay className="h-5 w-5 md:h-7 md:w-7 text-black" />
                       재생
                     </Button>
 
@@ -111,32 +130,71 @@ const ModalComponent: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="w-full flex flex-col mt-4 px-8 py-8 gap-8">
-                <h3 className="text-xl font-bold text-gray-100 md:text-2xl lg:text-5xl">
-                  {content?.title || 'Title'}
-                </h3>
-                <div className="flex items-start justify-between gap-6">
-                  <p
-                    className="flex-[2.5] text-xs text-shadow-md md:text-lg lg:text-2xl"
-                    style={{ lineHeight: '1.75' }}
-                  >
-                    {content?.description}
-                  </p>
-                  <div className="flex-[1] flex flex-col gap-4 text-xs text-shadow-md md:text-base lg:text-base">
+              <div className="w-full flex flex-col mt-4 px-6 md:px-10 py-6">
+                <div className="flex flex-col md:flex-row items-start justify-between gap-8">
+                  <div className="flex-[2] flex flex-col gap-6">
                     {content?.tags && (
-                      <div className="flex items-center gap-4">
+                      <ul className="flex items-center gap-4">
                         {content.tags.map((tag, index) => (
-                          <div key={index} className="flex items-center gap-4">
-                            <p className="px-3 py-2 bg-slate-700 rounded-lg">
-                              {tag}
-                            </p>
-                          </div>
+                          <li
+                            key={index}
+                            className="px-5 py-1 text-sm md:text-lg bg-slate-700 rounded-xl"
+                          >
+                            {tag}
+                          </li>
                         ))}
+                      </ul>
+                    )}
+                    <p
+                      className="text-base text-shadow-md lg:text-lg"
+                      style={{ lineHeight: '1.75' }}
+                    >
+                      {content?.description}
+                    </p>
+                  </div>
+                  <div className="flex-[1] flex flex-col gap-2 text-xs text-shadow-md md:text-base lg:text-base">
+                    {extendContent?.director && (
+                      <div className="flex items-center gap-2">
+                        <p className="text-gray-500">감독 : </p>
+                        <p>{extendContent.director.name}</p>
                       </div>
                     )}
+                    {extendContent?.actors &&
+                      extendContent?.actors.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <p className="text-gray-500">출연 : </p>
+                          <p>
+                            {extendContent.actors
+                              .map((actor) => actor.actor.name)
+                              .join(', ')}
+                          </p>
+                        </div>
+                      )}
+                    {extendContent?.genres &&
+                      extendContent?.genres.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <p className="text-gray-500">장르 : </p>
+                          <p>
+                            {extendContent.genres
+                              .map((genre) => genre.genre.name)
+                              .join(', ')}
+                          </p>
+                        </div>
+                      )}
+                    {extendContent?.countries &&
+                      extendContent?.countries.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <p className="text-gray-500">국가 : </p>
+                          <p>
+                            {extendContent.countries
+                              .map((country) => country.country.name)
+                              .join(', ')}
+                          </p>
+                        </div>
+                      )}
                     {content?.releaseDate && (
-                      <div className="flex items-center gap-4">
-                        <p>개봉일 : </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-gray-500">개봉일 : </p>
                         <p>
                           {format(
                             new Date(content?.releaseDate),
@@ -146,8 +204,8 @@ const ModalComponent: React.FC = () => {
                       </div>
                     )}
                     {content?.duration && (
-                      <div className="flex items-center gap-4">
-                        <p>상영 시간 : </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-gray-500">상영 시간 : </p>
                         <p>{formatTime(content?.duration)}</p>
                       </div>
                     )}
@@ -155,55 +213,56 @@ const ModalComponent: React.FC = () => {
                 </div>
               </div>
               {content && content.type === 'SERIES' && (
-                <div className="w-full mt-12 px-8 pb-20">
-                  <h4 className="text-2xl font-medium text-slate-300 mb-12">
+                <div className="w-full mt-4 md:mt-12 px-6 md:px-10 pb-20">
+                  <h4 className="text-2xl font-medium text-slate-300 mb-4 md:mb-12">
                     회차
                   </h4>
                   {loading ? (
                     <SkeletonList />
                   ) : (
                     <ul className="flex flex-col mt-2 border-t border-gray-700">
-                      {episode?.map((episode) => (
-                        <li
-                          key={episode.id}
-                          onClick={() => {
-                            handleClose();
-                            navigate.push(`/watch/${episode.id}`);
-                          }}
-                          className="h-[200px] px-8 border-b border-gray-700 cursor-pointer rounded-lg flex items-center text-gray-300 hover:bg-slate-800 transition-all ease-in-out "
-                        >
-                          <div className="relative w-full h-[170px] flex items-center gap-12">
-                            <p className="w-[30px] text-3xl text-white">
-                              {episode.episode}
-                            </p>
-                            <div className="h-full flex gap-8 items-start">
-                              <div className="h-full flex items-center justify-center">
-                                <div className="relative w-[280px] h-[170px]">
-                                  <Image
-                                    src={
-                                      episode.posterUrl ||
-                                      '/images/noPoster.webp'
-                                    }
-                                    layout="fill"
-                                    objectFit="cover"
-                                    alt={episode.title}
-                                    className="rounded"
-                                    priority
-                                  />
+                      {extendContent?.episodes &&
+                        extendContent?.episodes?.map((episode) => (
+                          <li
+                            key={episode.id}
+                            onClick={() => {
+                              handleClose();
+                              navigate.push(`/watch/${episode.id}`);
+                            }}
+                            className="h-[50px] md:h-[200px] md:px-8 border-b border-gray-700 cursor-pointer rounded-lg flex items-center text-gray-300 hover:bg-slate-800 transition-all ease-in-out "
+                          >
+                            <div className="relative w-full h-[30px] md:h-[170px] flex items-center md:gap-12">
+                              <p className="w-[40px] md:w-[30px] text-lg md:text-3xl text-white">
+                                {episode.episode}
+                              </p>
+                              <div className="h-full flex gap-8 items-start">
+                                <div className="h-full hidden md:flex items-center justify-center">
+                                  <div className="relative w-[280px] h-[170px]">
+                                    <Image
+                                      src={
+                                        episode.posterUrl ||
+                                        '/images/noPoster.webp'
+                                      }
+                                      layout="fill"
+                                      objectFit="cover"
+                                      alt={episode.title}
+                                      className="rounded"
+                                      priority
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex flex-col gap-4 items-start">
+                                  <p className="text-lg md:text-xl font-medium text-white">
+                                    {episode.title}
+                                  </p>
+                                  <p className="hidden md:block text-sm text-gray-400">
+                                    {episode.description || content.description}
+                                  </p>
                                 </div>
                               </div>
-                              <div className="flex flex-col gap-4 items-start">
-                                <p className="text-xl font-medium text-white">
-                                  {episode.title}
-                                </p>
-                                <p className="text-sm text-gray-400">
-                                  {episode.description || content.description}
-                                </p>
-                              </div>
                             </div>
-                          </div>
-                        </li>
-                      ))}
+                          </li>
+                        ))}
                     </ul>
                   )}
                 </div>

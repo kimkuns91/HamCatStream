@@ -1,5 +1,4 @@
-import { Content, Episode } from "@prisma/client";
-
+import { Content } from "@prisma/client";
 import { atom } from "recoil";
 
 export const modalState = atom({

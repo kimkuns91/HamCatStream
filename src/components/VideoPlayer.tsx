@@ -240,7 +240,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-screen min-h-screen max-h-screen bg-black text-2xl focus:outline-none"
+      className="relative w-full h-screen min-h-screen max-h-screen bg-black text-sm md:text-2xl focus:outline-none"
     >
       <TopControlBar
         showControls={showControls}

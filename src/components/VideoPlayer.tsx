@@ -3,14 +3,15 @@
 import '@videojs/themes/dist/fantasy/index.css';
 import 'video.js/dist/video-js.css';
 
-import { mutedState, volumeState } from '@/lib/state/modalAtom';
 import React, { useEffect, useRef, useState } from 'react';
+import { mutedState, volumeState } from '@/lib/state/modalAtom';
 
-import { useRecoilState } from 'recoil';
-import videojs from 'video.js';
-import type VideoJsPlayer from 'video.js/dist/types/player';
 import BottomControlBar from './BottomControlBar';
 import TopControlBar from './TopControlBar';
+import type VideoJsPlayer from 'video.js/dist/types/player';
+import { useRecoilState } from 'recoil';
+import { useRouter } from 'next/navigation';
+import videojs from 'video.js';
 
 interface VideoPlayerProps {
   options: {
@@ -48,6 +49,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [duration, setDuration] = useState(0);
   const [aspectRatio, setAspectRatio] = useState('16 / 9');
   const timerRef = useRef<number | null>(null);
+
+  const navigate = useRouter();
 
   useEffect(() => {
     if (!playerRef.current) {
@@ -244,7 +247,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     >
       <TopControlBar
         showControls={showControls}
-        onBack={() => window.history.back()}
+        onBack={() => navigate.push('/')}
       />
       <div
         data-vjs-player

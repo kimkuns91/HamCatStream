@@ -23,7 +23,7 @@ const Header = () => {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const shouldHideHeader = pathname.startsWith('/watch');
+  const shouldHideHeader = pathname.startsWith('/watch') || pathname === '/intro';
 
   useEffect(() => {
     const handleScroll = () => {
